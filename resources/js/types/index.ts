@@ -1,40 +1,70 @@
-import { LucideIcon } from 'lucide-react';
-
-export interface Auth {
-    user: User;
-}
-
-export interface BreadcrumbItem {
-    title: string;
-    href: string;
-}
-
-export interface NavGroup {
-    title: string;
-    items: NavItem[];
-}
-
-export interface NavItem {
-    title: string;
-    url: string;
-    icon?: LucideIcon | null;
-    isActive?: boolean;
-}
-
-export interface SharedData {
-    name: string;
-    quote: { message: string; author: string };
-    auth: Auth;
-    [key: string]: unknown;
-}
+export type Peran = 'karyawan' | 'manajer' | 'gm' | 'admin';
+export type Akses = 'publik' | 'divisi';
+export type StatusDokumen = 'draf' | 'menunggu_manajer' | 'menunggu_gm' | 'disetujui' | 'ditolak';
+export type JenisRelasi = 'mengubah' | 'mencabut' | 'menggantikan' | 'terkait';
 
 export interface User {
     id: number;
     name: string;
     email: string;
-    avatar?: string;
-    email_verified_at: string | null;
-    created_at: string;
-    updated_at: string;
-    [key: string]: unknown; // This allows for additional properties...
+    peran: Peran;
+    division: { id: number; nama: string } | null;
+}
+
+export interface SharedData {
+    name: string;
+    auth: { user: User | null };
+    flash: { sukses: string | null; galat: string | null };
+    [key: string]: unknown;
+}
+
+export interface Pilihan {
+    id: number;
+    nama: string;
+}
+
+export interface Relasi {
+    jenis: JenisRelasi;
+    arah: 'keluar' | 'masuk';
+    dokumen: { id: number; judul: string; nomor: string };
+}
+
+export interface Riwayat {
+    id: number;
+    aksi: 'ajukan' | 'setuju' | 'tolak';
+    tahap: 'manajer' | 'gm';
+    catatan: string | null;
+    oleh: string;
+    waktu: string;
+}
+
+export interface Dokumen {
+    id: number;
+    judul: string;
+    nomor: string;
+    jenis: string;
+    divisi: string;
+    akses: Akses;
+    status: StatusDokumen;
+    status_hukum: string;
+    berakhir: boolean;
+    tahun: number | null;
+    tanggal_penetapan: string | null;
+    tanggal_kadaluarsa: string | null;
+    abstrak: string;
+    subjek: string | null;
+    pengaju?: string;
+    berkas_nama?: string | null;
+    berkas_ukuran?: number | null;
+    boleh_unduh?: boolean;
+    relasi?: Relasi[];
+    riwayat?: Riwayat[];
+}
+
+export interface Halaman<T> {
+    data: T[];
+    links: { url: string | null; label: string; active: boolean }[];
+    total: number;
+    from: number | null;
+    to: number | null;
 }
