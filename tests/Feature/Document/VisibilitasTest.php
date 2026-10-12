@@ -28,7 +28,10 @@ dataset('visibilitas', function () {
     ];
     $aktor = ['guest', 'karyawan', 'karyawanLain', 'manajer', 'manajerLain', 'gm', 'admin', 'pengaju'];
 
-    foreach ($tabel as [$status, $akses, ...$harapan]) {
+    foreach ($tabel as $kolom) {
+        [$status, $akses] = $kolom;
+        $harapan = array_slice($kolom, 2);
+
         foreach ($aktor as $i => $siapa) {
             $baris["{$status}/{$akses} oleh {$siapa}"] = [$s::from($status), Akses::from($akses), $siapa, $harapan[$i]];
         }

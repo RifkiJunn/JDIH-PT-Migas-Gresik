@@ -13,6 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->alias(['peran' => \App\Http\Middleware\PastikanPeran::class]);
+        $middleware->redirectGuestsTo('/login');
+        $middleware->redirectUsersTo(fn ($request) => $request->user()->beranda());
+
         $middleware->web(append: [
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
