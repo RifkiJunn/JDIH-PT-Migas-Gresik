@@ -119,4 +119,59 @@ class Document extends Model
     {
         return $this->tanggal_penetapan?->year;
     }
+
+    /**
+     * Bentuk dokumen yang dikirim ke halaman (tipe `Dokumen` di resources/js/types).
+     * ponytail: statusHukum() satu query per baris; cukup untuk daftar berhalaman 20,
+     * ganti dengan withExists bila daftar membesar.
+     */
+    public function ringkas(): array
+    {
+        return [
+            'id' => $this->id,
+            'judul' => $this->judul,
+            'nomor' => $this->nomor,
+            'jenis' => $this->type->nama,
+            'divisi' => $this->division->nama,
+            'akses' => $this->akses,
+            'status' => $this->status,
+            'status_hukum' => $this->statusHukum(),
+            'berakhir' => $this->isBerakhir(),
+            'tahun' => $this->tahun(),
+            'tanggal_penetapan' => $this->tanggal_penetapan?->toDateString(),
+            'tanggal_kadaluarsa' => $this->tanggal_kadaluarsa?->toDateString(),
+            'abstrak' => $this->abstrak,
+            'subjek' => $this->subjek,
+            'pengaju' => $this->pengaju->name,
+        ];
+    }
+
+    /** ringkas() ditambah berkas, relasi dua arah yang boleh dilihat $user, dan riwayat persetujuan. */
+    public function rinci(?User $user): array
+    {
+        $terlihat = fn (Builder $q) => $q->visibleTo($user)->disetujui();
+        $relasi = fn (string $arah, string $kolom) => fn (DocumentRelation $r) => [
+            'jenis' => $r->jenis,
+            'arah' => $arah,
+            'dokumen' => $r->{$kolom}->only('id', 'judul', 'nomor'),
+        ];
+
+        return $this->ringkas() + [
+            'berkas_nama' => $this->berkas_nama,
+            'berkas_ukuran' => $this->berkas_ukuran,
+            'boleh_unduh' => $user?->can('download', $this) ?? (new \App\Policies\DocumentPolicy)->download(null, $this),
+            'relasi' => [
+                ...$this->relasiKeluar()->whereHas('related', $terlihat)->with('related')->get()->map($relasi('keluar', 'related')),
+                ...$this->relasiMasuk()->whereHas('document', $terlihat)->with('document')->get()->map($relasi('masuk', 'document')),
+            ],
+            'riwayat' => $this->approvalLogs()->with('user')->get()->map(fn (ApprovalLog $l) => [
+                'id' => $l->id,
+                'aksi' => $l->aksi,
+                'tahap' => $l->tahap,
+                'catatan' => $l->catatan,
+                'oleh' => $l->user->name,
+                'waktu' => $l->created_at->toIso8601String(),
+            ]),
+        ];
+    }
 }
