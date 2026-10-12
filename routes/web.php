@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\LogController;
 use App\Http\Controllers\Admin\MasterController;
 use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\DokumenController;
+use App\Http\Controllers\EkstraksiController;
 use App\Http\Controllers\PengajuanController;
 use App\Http\Controllers\PersetujuanController;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,7 @@ Route::middleware('auth')->group(function () {
         Route::get('pengajuan', [PengajuanController::class, 'index'])->name('pengajuan.index');
         Route::get('pengajuan/buat', [PengajuanController::class, 'create'])->name('pengajuan.create');
         Route::post('pengajuan', [PengajuanController::class, 'store'])->name('pengajuan.store');
+        Route::post('pengajuan/ekstrak', EkstraksiController::class)->middleware('throttle:10,1')->name('pengajuan.ekstrak');
         Route::get('pengajuan/{document}/ubah', [PengajuanController::class, 'edit'])->name('pengajuan.edit');
         Route::put('pengajuan/{document}', [PengajuanController::class, 'update'])->name('pengajuan.update');
         Route::delete('pengajuan/{document}', [PengajuanController::class, 'destroy'])->name('pengajuan.destroy');
