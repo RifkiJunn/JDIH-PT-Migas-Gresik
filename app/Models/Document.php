@@ -94,6 +94,44 @@ class Document extends Model
         $query->where('status', StatusDokumen::Disetujui);
     }
 
+    /**
+     * Pencarian dan filter daftar dokumen. Nilai yang tidak sah (bukan skalar, bukan angka) diabaikan.
+     * LIKE ditulis dengan ESCAPE eksplisit supaya % dan _ dari pengguna tidak menjadi wildcard
+     * dan perilakunya sama di PostgreSQL, MySQL, dan SQLite.
+     *
+     * @param  array{q?: mixed, jenis?: mixed, tahun?: mixed, subjek?: mixed, kadaluarsa?: mixed}  $filter
+     */
+    public function scopeSaring(Builder $query, array $filter): void
+    {
+        $teks = fn (string $k) => is_string($filter[$k] ?? null) && trim($filter[$k]) !== '' ? trim($filter[$k]) : null;
+        $angka = fn (string $k) => ctype_digit((string) ($teks($k) ?? '')) ? (int) $filter[$k] : null;
+
+        if ($q = $teks('q')) {
+            $pola = '%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], mb_strtolower($q)).'%';
+            $query->where(fn (Builder $b) => $b
+                ->whereRaw("LOWER(judul) LIKE ? ESCAPE '!'", [$pola])
+                ->orWhereRaw("LOWER(nomor) LIKE ? ESCAPE '!'", [$pola]));
+        }
+
+        $query
+            ->when($angka('jenis'), fn (Builder $b, int $id) => $b->where('document_type_id', $id))
+            ->when($angka('tahun'), fn (Builder $b, int $tahun) => $b->whereYear('tanggal_penetapan', $tahun))
+            ->when($teks('subjek'), fn (Builder $b, string $s) => $b->where('subjek', $s))
+            ->when($teks('kadaluarsa'), fn (Builder $b) => $b->whereBetween('tanggal_kadaluarsa', [today(), today()->addDays(90)]));
+    }
+
+    /** Isi pilihan filter (jenis, tahun, subjek) dari dokumen yang ada di $query. */
+    public static function pilihanFilter(Builder $query): array
+    {
+        $baris = $query->toBase()->get(['document_type_id', 'tanggal_penetapan', 'subjek']);
+
+        return [
+            'jenis' => DocumentType::whereIn('id', $baris->pluck('document_type_id')->unique())->orderBy('nama')->get(['id', 'nama']),
+            'tahun' => $baris->map(fn ($b) => (int) substr($b->tanggal_penetapan, 0, 4))->unique()->sortDesc()->values(),
+            'subjek' => $baris->pluck('subjek')->filter()->unique()->sort()->values(),
+        ];
+    }
+
     public function isBerakhir(): bool
     {
         return $this->status === StatusDokumen::Disetujui
