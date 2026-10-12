@@ -42,7 +42,7 @@ export default function PengajuanIndex({ dokumen }: { dokumen: Halaman<Baris> })
                     </p>
                 </div>
             ) : (
-                <ul className="border-t">
+                <ul className="-mt-6">
                     {dokumen.data.map((d) => (
                         <li key={d.id} className="grid gap-x-6 gap-y-2 border-b py-4 sm:grid-cols-[1fr_auto]">
                             <div className="min-w-0">

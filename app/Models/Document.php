@@ -6,6 +6,8 @@ use App\Enums\Akses;
 use App\Enums\JenisRelasi;
 use App\Enums\Peran;
 use App\Enums\StatusDokumen;
+use App\Policies\DocumentPolicy;
+use Database\Factories\DocumentFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +17,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Document extends Model
 {
-    /** @use HasFactory<\Database\Factories\DocumentFactory> */
+    /** @use HasFactory<DocumentFactory> */
     use HasFactory, SoftDeletes;
 
     protected $guarded = ['id'];
@@ -197,7 +199,7 @@ class Document extends Model
         return $this->ringkas() + [
             'berkas_nama' => $this->berkas_nama,
             'berkas_ukuran' => $this->berkas_ukuran,
-            'boleh_unduh' => $user?->can('download', $this) ?? (new \App\Policies\DocumentPolicy)->download(null, $this),
+            'boleh_unduh' => $user?->can('download', $this) ?? (new DocumentPolicy)->download(null, $this),
             'relasi' => [
                 ...$this->relasiKeluar()->whereHas('related', $terlihat)->with('related')->get()->map($relasi('keluar', 'related')),
                 ...$this->relasiMasuk()->whereHas('document', $terlihat)->with('document')->get()->map($relasi('masuk', 'document')),

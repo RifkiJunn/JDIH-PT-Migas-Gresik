@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\AksiPersetujuan;
 use App\Enums\StatusDokumen;
+use App\Exceptions\TransisiTidakSah;
 use App\Http\Requests\SimpanPengajuanRequest;
 use App\Models\Document;
 use App\Models\DocumentType;
@@ -127,7 +128,7 @@ class PengajuanController extends Controller
         if ($request->boolean('ajukan')) {
             try {
                 $alur->ajukan($document, $request->user());
-            } catch (\App\Exceptions\TransisiTidakSah $e) {
+            } catch (TransisiTidakSah $e) {
                 return to_route('pengajuan.index')->with('galat', 'Tersimpan sebagai draf. '.$e->getMessage());
             }
 

@@ -6,11 +6,12 @@ use App\Enums\Akses;
 use App\Enums\Peran;
 use App\Enums\StatusDokumen;
 use App\Models\Division;
+use App\Models\Document;
 use App\Models\DocumentType;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/** @extends Factory<\App\Models\Document> */
+/** @extends Factory<Document> */
 class DocumentFactory extends Factory
 {
     public function definition(): array

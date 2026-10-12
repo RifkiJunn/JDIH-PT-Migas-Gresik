@@ -70,7 +70,7 @@ export default function Pengguna({ pengguna, divisi }: { pengguna: Akun[]; divis
                 <tbody>
                     {pengguna.map((u) => (
                         <tr key={u.id}>
-                            <Td className="font-medium">{u.name}</Td>
+                            <Td className="font-medium whitespace-nowrap">{u.name}</Td>
                             <Td className="text-muted-foreground">{u.email}</Td>
                             <Td>{NAMA_PERAN[u.peran]}</Td>
                             <Td>{u.divisi ?? <span className="text-muted-foreground">Semua divisi</span>}</Td>

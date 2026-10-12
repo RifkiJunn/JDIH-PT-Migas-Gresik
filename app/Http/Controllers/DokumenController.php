@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\AksiAkses;
+use App\Models\AccessLog;
 use App\Models\Document;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -82,7 +83,7 @@ class DokumenController extends Controller
 
     private function catat(Request $request, Document $document, AksiAkses $aksi): void
     {
-        $document->hasMany(\App\Models\AccessLog::class)->create([
+        $document->hasMany(AccessLog::class)->create([
             'user_id' => $request->user()?->id,
             'aksi' => $aksi,
             'ip' => $request->ip(),

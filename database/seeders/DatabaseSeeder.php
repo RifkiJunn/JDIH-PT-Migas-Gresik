@@ -96,7 +96,7 @@ class DatabaseSeeder extends Seeder
     private static function pdfContoh(string $judul): string
     {
         $teks = preg_replace('/[^\x20-\x7E]/', '', str_replace(['\\', '(', ')'], '', $judul));
-        $isi = "BT /F1 12 Tf 60 760 Td (Dokumen contoh) Tj 0 -22 Td (".substr($teks, 0, 80).") Tj ET";
+        $isi = 'BT /F1 12 Tf 60 760 Td (Dokumen contoh) Tj 0 -22 Td ('.substr($teks, 0, 80).') Tj ET';
         $objek = [
             '<< /Type /Catalog /Pages 2 0 R >>',
             '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',

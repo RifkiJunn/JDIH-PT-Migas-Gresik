@@ -54,7 +54,7 @@ export default function DocumentFilter({
                     <Input
                         type="search"
                         aria-label="Cari judul atau nomor dokumen"
-                        placeholder="Cari judul atau nomor dokumen"
+                        placeholder="Judul atau nomor dokumen"
                         value={q}
                         onChange={(e) => setQ(e.target.value)}
                         className="pl-9"

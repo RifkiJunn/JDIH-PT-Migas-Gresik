@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Peran;
+use App\Models\AccessLog;
 use App\Models\Division;
 use App\Models\Document;
 use App\Models\DocumentType;
@@ -102,7 +103,7 @@ it('divisi atau jenis yang masih dipakai tidak bisa dihapus', function () {
 it('log memuat persetujuan dan akses, bisa disaring tanggal', function () {
     $dok = Document::factory()->disetujui()->create();
     $dok->approvalLogs()->create(['user_id' => $this->admin->id, 'aksi' => 'setuju', 'tahap' => 'gm']);
-    \App\Models\AccessLog::create(['document_id' => $dok->id, 'aksi' => 'unduh', 'ip' => '10.0.0.1']);
+    AccessLog::create(['document_id' => $dok->id, 'aksi' => 'unduh', 'ip' => '10.0.0.1']);
 
     $this->actingAs($this->admin)->get('/admin/log')->assertInertia(fn (AssertableInertia $page) => $page
         ->component('admin/log')->where('tab', 'persetujuan')->has('log.data', 1)->where('log.data.0.dokumen', $dok->judul));
