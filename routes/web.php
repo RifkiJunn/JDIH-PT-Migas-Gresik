@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\LogController;
+use App\Http\Controllers\Admin\MasterController;
+use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\DokumenController;
 use App\Http\Controllers\PengajuanController;
 use App\Http\Controllers\PersetujuanController;
@@ -31,6 +34,23 @@ Route::middleware('auth')->group(function () {
         Route::get('persetujuan/{document}', [PersetujuanController::class, 'show'])->name('persetujuan.show');
         Route::post('persetujuan/{document}/setujui', [PersetujuanController::class, 'setujui'])->name('persetujuan.setujui');
         Route::post('persetujuan/{document}/tolak', [PersetujuanController::class, 'tolak'])->name('persetujuan.tolak');
+    });
+
+    Route::middleware('peran:admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('pengguna', [PenggunaController::class, 'index'])->name('pengguna.index');
+        Route::post('pengguna', [PenggunaController::class, 'store'])->name('pengguna.store');
+        Route::put('pengguna/{pengguna}', [PenggunaController::class, 'update'])->name('pengguna.update');
+
+        foreach (['divisi', 'jenis-dokumen'] as $master) {
+            Route::controller(MasterController::class)->prefix($master)->name("{$master}.")->group(function () use ($master) {
+                Route::get('/', 'index')->name('index')->defaults('master', $master);
+                Route::post('/', 'store')->name('store')->defaults('master', $master);
+                Route::put('{id}', 'update')->name('update')->defaults('master', $master)->whereNumber('id');
+                Route::delete('{id}', 'destroy')->name('destroy')->defaults('master', $master)->whereNumber('id');
+            });
+        }
+
+        Route::get('log', LogController::class)->name('log');
     });
 });
 
