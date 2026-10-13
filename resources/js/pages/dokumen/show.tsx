@@ -10,7 +10,7 @@ export default function DokumenShow({ dokumen }: { dokumen: Dokumen }) {
     // Dokumen publik yang sudah berlaku selalu tampil dalam kerangka JDIH; selebihnya adalah halaman ruang internal.
     const publik = dokumen.akses === 'publik' && dokumen.status === 'disetujui';
     const Layout = auth.user && !publik ? InternalLayout : PublicLayout;
-    const kembali = Layout === PublicLayout ? route('beranda') : route('ruang');
+    const kembali = Layout === PublicLayout ? route('dokumen.index') : route('ruang');
 
     return (
         <Layout>

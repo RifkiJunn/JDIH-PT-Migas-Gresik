@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\DocumentType;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -29,6 +30,14 @@ class HandleInertiaRequests extends Middleware
                 'sukses' => $request->session()->get('sukses'),
                 'galat' => $request->session()->get('galat'),
             ],
+            // Menu dan kaki portal publik: jenis yang punya dokumen publik, beserta jumlahnya.
+            // ponytail: satu query per halaman penuh; beri cache bila lalu lintas publik ramai.
+            'jenisPublik' => fn () => DocumentType::query()
+                ->withCount(['documents as jumlah' => fn ($q) => $q->visibleTo(null)->disetujui()])
+                ->orderBy('nama')->get(['id', 'nama'])
+                ->where('jumlah', '>', 0)->values()
+                ->map->only('id', 'nama', 'jumlah'),
+            'kontak' => array_filter(config('jdih.kontak')),
         ];
     }
 }

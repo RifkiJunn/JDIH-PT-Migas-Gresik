@@ -17,12 +17,29 @@ class DokumenController extends Controller
 {
     private const FILTER = ['q', 'jenis', 'tahun', 'subjek', 'kadaluarsa'];
 
-    /** Beranda JDIH: selalu versi publik, juga bagi pengunjung yang sedang login. */
-    public function beranda(Request $request): Response
+    /**
+     * Beranda JDIH: ringkasan koleksi publik. Daftar jenis dan jumlahnya datang dari
+     * prop bersama `jenisPublik` (HandleInertiaRequests), yang juga mengisi menu dan kaki halaman.
+     */
+    public function beranda(): Response
     {
         $publik = fn () => Document::visibleTo(null)->disetujui();
 
         return Inertia::render('beranda', [
+            'total' => $publik()->count(),
+            'tahun' => Document::pilihanFilter($publik())['tahun'],
+            'terbaru' => $publik()->with('type', 'division', 'pengaju')
+                ->orderByDesc('tanggal_penetapan')->orderByDesc('id')->limit(5)->get()
+                ->map(fn (Document $d) => $d->ringkas()),
+        ]);
+    }
+
+    /** Daftar dokumen publik: selalu versi publik, juga bagi pengunjung yang sedang login. */
+    public function index(Request $request): Response
+    {
+        $publik = fn () => Document::visibleTo(null)->disetujui();
+
+        return Inertia::render('dokumen/index', [
             'dokumen' => $this->daftar($publik(), $request),
             'filter' => $request->only(self::FILTER),
             'pilihan' => Document::pilihanFilter($publik()),

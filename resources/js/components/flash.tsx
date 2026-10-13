@@ -11,8 +11,8 @@ export default function Flash() {
             role={flash.galat ? 'alert' : 'status'}
             className={
                 flash.galat
-                    ? 'border-status-bad text-status-bad mb-6 border-l-2 bg-red-50 px-4 py-3 text-sm'
-                    : 'border-status-ok text-status-ok mb-6 border-l-2 bg-green-50 px-4 py-3 text-sm'
+                    ? 'text-status-bad border-status-bad/30 mb-6 rounded-md border bg-red-50 px-4 py-3 text-sm font-medium'
+                    : 'text-status-ok border-status-ok/30 mb-6 rounded-md border bg-green-50 px-4 py-3 text-sm font-medium'
             }
         >
             {flash.galat ?? flash.sukses}

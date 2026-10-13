@@ -15,6 +15,8 @@ export interface SharedData {
     name: string;
     auth: { user: User | null };
     flash: { sukses: string | null; galat: string | null };
+    jenisPublik: { id: number; nama: string; jumlah: number }[];
+    kontak: { pengelola?: string; alamat?: string; email?: string; telepon?: string };
     [key: string]: unknown;
 }
 

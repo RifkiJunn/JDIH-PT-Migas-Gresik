@@ -60,7 +60,7 @@ export default function PengajuanIndex({ dokumen }: { dokumen: Halaman<Baris> })
                                     {d.judul}
                                 </Link>
                                 {d.catatan_penolakan && (
-                                    <p className="border-status-bad mt-2 border-l-2 pl-3 text-sm">
+                                    <p className="border-status-bad/30 mt-2 rounded-md border bg-red-50 px-3 py-2 text-sm">
                                         <span className="text-status-bad font-medium">Catatan penolakan: </span>
                                         {d.catatan_penolakan}
                                     </p>

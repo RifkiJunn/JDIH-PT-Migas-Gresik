@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Route;
 
 // Terbuka untuk umum. Hak lihat tiap dokumen diperiksa DocumentPolicy di dalam controller.
 Route::get('/', [DokumenController::class, 'beranda'])->name('beranda');
+Route::get('dokumen', [DokumenController::class, 'index'])->name('dokumen.index');
+Route::get('tentang', fn () => Inertia\Inertia::render('tentang'))->name('tentang');
 Route::get('dokumen/{document}', [DokumenController::class, 'show'])->name('dokumen.show');
 Route::get('dokumen/{document}/berkas', [DokumenController::class, 'lihatBerkas'])->name('berkas.lihat');
 Route::get('dokumen/{document}/berkas/unduh', [DokumenController::class, 'unduhBerkas'])->name('berkas.unduh');

@@ -36,6 +36,10 @@
     --color-input: var(--input);
     --color-ring: var(--primary);
 
+    /* Teks sekunder di atas indigo: ditarik dari rona indigo, bukan abu-abu. */
+    --color-on-primary-muted: #cdcff3;
+    --color-sky-ink: #04263a;
+
     --color-status-ok: #0f6b3c;
     --color-status-wait: #8a5300;
     --color-status-bad: #b42318;
@@ -69,6 +73,16 @@
     body {
         @apply bg-background text-foreground;
         font-feature-settings: 'tnum';
+        caret-color: var(--primary);
+        accent-color: var(--primary);
+    }
+
+    ::selection {
+        background: color-mix(in srgb, var(--sky) 28%, transparent);
+    }
+
+    a {
+        text-underline-offset: 0.2em;
     }
 
     a,
@@ -90,4 +104,12 @@
             transition-duration: 0.01ms !important;
         }
     }
+}
+
+/* Siluet nyala api dari logo PTGM, diwarnai lewat background-color elemen. */
+@utility mask-flame {
+    mask-image: url('/images/ptgm-logo.png');
+    mask-repeat: no-repeat;
+    mask-position: top center;
+    mask-size: contain;
 }

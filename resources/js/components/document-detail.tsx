@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { NAMA_AKSES, NAMA_RELASI, NAMA_RELASI_MASUK, tanggal, ukuran, waktu } from '@/lib/format';
 import { type Dokumen } from '@/types';
 import { Link } from '@inertiajs/react';
-import { Download, ExternalLink } from 'lucide-react';
+import { Download, ExternalLink, Lock } from 'lucide-react';
 import { type ReactNode } from 'react';
 
 const AKSI = { ajukan: 'Diajukan', setuju: 'Disetujui', tolak: 'Ditolak' } as const;
@@ -74,7 +74,10 @@ export default function DocumentDetail({ dokumen, riwayat = false, children }: {
                             </div>
                         </>
                     ) : (
-                        <p className="text-muted-foreground mt-8 border-l-2 pl-3 text-sm">Naskah dokumen ini hanya dapat dibuka oleh divisi pemiliknya.</p>
+                        <p className="text-muted-foreground bg-surface mt-8 flex items-center gap-2 rounded-md px-3 py-2.5 text-sm">
+                            <Lock aria-hidden className="size-4 shrink-0" />
+                            Naskah dokumen ini hanya dapat dibuka oleh divisi pemiliknya.
+                        </p>
                     )}
                 </div>
 
