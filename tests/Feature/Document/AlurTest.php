@@ -142,11 +142,11 @@ it('pengaju boleh mengubah dan menghapus draf serta dokumen ditolak, orang lain 
         ->and($this->manajer->can('update', $dok))->toBeFalse();
 })->with([StatusDokumen::Draf, StatusDokumen::Ditolak]);
 
-it('mengarahkan tiap peran ke halamannya setelah login', function (string $peran, string $tujuan) {
+it('mengarahkan tiap peran ke ringkasan ruang internal setelah login', function (string $peran) {
     $user = User::factory()->{$peran}()->create();
 
-    $this->post('/login', ['email' => $user->email, 'password' => 'password'])->assertRedirect($tujuan);
-})->with([['karyawan', '/arsip'], ['manajer', '/persetujuan'], ['gm', '/persetujuan'], ['admin', '/admin/pengguna']]);
+    $this->post('/login', ['email' => $user->email, 'password' => 'password'])->assertRedirect('/ruang');
+})->with(['karyawan', 'manajer', 'gm', 'admin']);
 
 it('middleware peran menolak peran yang tidak cocok', function () {
     Route::middleware(['web', 'auth', 'peran:gm,admin'])->get('/_uji-peran', fn () => 'ok');

@@ -7,6 +7,7 @@ use App\Http\Controllers\DokumenController;
 use App\Http\Controllers\EkstraksiController;
 use App\Http\Controllers\PengajuanController;
 use App\Http\Controllers\PersetujuanController;
+use App\Http\Controllers\RuangController;
 use Illuminate\Support\Facades\Route;
 
 // Terbuka untuk umum. Hak lihat tiap dokumen diperiksa DocumentPolicy di dalam controller.
@@ -18,7 +19,7 @@ Route::get('dokumen/{document}/berkas', [DokumenController::class, 'lihatBerkas'
 Route::get('dokumen/{document}/berkas/unduh', [DokumenController::class, 'unduhBerkas'])->name('berkas.unduh');
 
 Route::middleware('auth')->group(function () {
-    Route::get('ruang', fn () => redirect(request()->user()->beranda()))->name('ruang');
+    Route::get('ruang', RuangController::class)->name('ruang');
 
     Route::get('arsip', [DokumenController::class, 'arsip'])->middleware('peran:karyawan,manajer,gm')->name('arsip.index');
 

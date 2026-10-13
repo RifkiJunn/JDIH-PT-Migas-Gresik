@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\Peran;
 use App\Enums\StatusDokumen;
 use App\Models\Document;
 use App\Services\DocumentWorkflow;
@@ -16,15 +15,7 @@ class PersetujuanController extends Controller
 {
     public function index(Request $request): Response
     {
-        $user = $request->user();
-
-        // Antrean = dokumen yang lolos DocumentPolicy::decide untuk akun ini.
-        $antrean = Document::with('type', 'division', 'pengaju')
-            ->when($user->peran === Peran::Gm,
-                fn ($q) => $q->where('status', StatusDokumen::MenungguGm),
-                fn ($q) => $q->where('status', StatusDokumen::MenungguManajer)
-                    ->where('division_id', $user->division_id)
-                    ->where('submitted_by', '!=', $user->id))
+        $antrean = Document::antrean($request->user())->with('type', 'division', 'pengaju')
             ->oldest('updated_at')
             ->get()
             ->map(fn (Document $d) => $d->ringkas() + ['diajukan' => $d->updated_at->toIso8601String()]);

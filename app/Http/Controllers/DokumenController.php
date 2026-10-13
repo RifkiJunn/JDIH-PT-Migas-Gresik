@@ -25,9 +25,21 @@ class DokumenController extends Controller
     {
         $publik = fn () => Document::visibleTo(null)->disetujui();
 
+        $total = $publik()->count();
+        $tahun = Document::pilihanFilter($publik())['tahun'];
+        $terkini = $tahun->first() ?? now()->year;
+        $kartu = fn (string $kunci, string $label, int $nilai, string $keterangan, ?string $href = null) => compact('kunci', 'label', 'nilai', 'keterangan', 'href');
+
         return Inertia::render('beranda', [
-            'total' => $publik()->count(),
-            'tahun' => Document::pilihanFilter($publik())['tahun'],
+            'total' => $total,
+            'tahun' => $tahun,
+            'statistik' => [
+                $kartu('arsip', 'Dokumen', $total, 'Terbuka untuk umum', '/dokumen'),
+                $kartu('jenis', 'Jenis dokumen', $publik()->distinct()->count('document_type_id'), 'Klasifikasi yang tersedia', '#menurut-jenis'),
+                $kartu('tahun', "Ditetapkan {$terkini}", $publik()->whereYear('tanggal_penetapan', $terkini)->count(), 'Tahun penetapan terbaru', "/dokumen?tahun={$terkini}"),
+                $kartu('unduh', 'Unduhan', AccessLog::where('aksi', AksiAkses::Unduh)
+                    ->whereHas('document', fn ($q) => $q->visibleTo(null)->disetujui())->count(), 'Berkas publik diunduh'),
+            ],
             'terbaru' => $publik()->with('type', 'division', 'pengaju')
                 ->orderByDesc('tanggal_penetapan')->orderByDesc('id')->limit(5)->get()
                 ->map(fn (Document $d) => $d->ringkas()),

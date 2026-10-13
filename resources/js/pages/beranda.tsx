@@ -1,6 +1,7 @@
 import DocumentRow from '@/components/document-row';
+import StatCards from '@/components/stat-cards';
 import PublicLayout from '@/layouts/public-layout';
-import { type Dokumen, type SharedData } from '@/types';
+import { type Dokumen, type SharedData, type Statistik } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { ArrowRight, Search } from 'lucide-react';
 import { type FormEventHandler, useState } from 'react';
@@ -8,7 +9,7 @@ import { type FormEventHandler, useState } from 'react';
 const PILIH =
     'text-foreground h-12 rounded-md bg-white px-3 text-base sm:text-sm lg:rounded-none lg:border-l lg:border-[var(--border)] lg:bg-transparent';
 
-function Hero({ total, tahun }: { total: number; tahun: number[] }) {
+function Hero({ tahun }: { tahun: number[] }) {
     const { jenisPublik } = usePage<SharedData>().props;
     const [isi, setIsi] = useState({ q: '', jenis: '', tahun: '' });
 
@@ -65,23 +66,36 @@ function Hero({ total, tahun }: { total: number; tahun: number[] }) {
                         Cari dokumen
                     </button>
                 </form>
-
-                {total > 0 && (
-                    <p className="text-on-primary-muted mt-5 text-sm">
-                        {total} dokumen terbuka untuk umum
-                        {tahun.length > 1 && `, ditetapkan ${tahun[tahun.length - 1]} sampai ${tahun[0]}`}.
-                    </p>
-                )}
             </div>
         </section>
     );
 }
 
-export default function Beranda({ total, tahun, terbaru }: { total: number; tahun: number[]; terbaru: Dokumen[] }) {
+interface Props {
+    total: number;
+    tahun: number[];
+    statistik: Statistik[];
+    terbaru: Dokumen[];
+}
+
+export default function Beranda({ total, tahun, statistik, terbaru }: Props) {
     const { jenisPublik } = usePage<SharedData>().props;
 
     return (
-        <PublicLayout hero={<Hero total={total} tahun={tahun} />}>
+        <PublicLayout
+            hero={
+                <>
+                    <Hero tahun={tahun} />
+                    {total > 0 && (
+                        // Kartu menumpang di batas bawah hero: separuh atas di bidang indigo, separuh bawah di halaman.
+                        <section aria-label="Statistik koleksi" className="relative">
+                            <div aria-hidden className="bg-primary absolute inset-x-0 top-0 h-1/2" />
+                            <StatCards items={statistik} className="relative mx-auto w-full max-w-6xl px-4 sm:px-6" />
+                        </section>
+                    )}
+                </>
+            }
+        >
             <Head title="Beranda" />
 
             {total === 0 ? (
@@ -93,7 +107,7 @@ export default function Beranda({ total, tahun, terbaru }: { total: number; tahu
                 </div>
             ) : (
                 <>
-                    <section aria-labelledby="menurut-jenis">
+                    <section aria-labelledby="menurut-jenis" className="scroll-mt-24">
                         <h2 id="menurut-jenis" className="font-serif text-2xl font-semibold tracking-tight">
                             Telusuri menurut jenis
                         </h2>

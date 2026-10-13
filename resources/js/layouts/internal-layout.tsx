@@ -13,6 +13,7 @@ import {
     ClipboardCheck,
     FilePlus2,
     Globe,
+    LayoutDashboard,
     LogOut,
     type LucideIcon,
     Menu,
@@ -24,6 +25,7 @@ import {
 import { type ReactNode } from 'react';
 
 const MENU: { label: string; href: string; icon: LucideIcon; peran: Peran[] }[] = [
+    { label: 'Ringkasan', href: '/ruang', icon: LayoutDashboard, peran: ['karyawan', 'manajer', 'gm', 'admin'] },
     { label: 'Persetujuan', href: '/persetujuan', icon: ClipboardCheck, peran: ['manajer', 'gm'] },
     { label: 'Arsip', href: '/arsip', icon: Archive, peran: ['karyawan', 'manajer', 'gm'] },
     { label: 'Pengajuan', href: '/pengajuan', icon: FilePlus2, peran: ['karyawan', 'manajer'] },

@@ -37,13 +37,9 @@ class User extends Authenticatable
         return in_array($this->peran, $peran, true);
     }
 
-    /** Halaman pertama setelah login, menurut peran. */
+    /** Halaman pertama setelah login: ringkasan ruang internal, isinya menurut peran. */
     public function beranda(): string
     {
-        return match ($this->peran) {
-            Peran::Karyawan => '/arsip',
-            Peran::Manajer, Peran::Gm => '/persetujuan',
-            Peran::Admin => '/admin/pengguna',
-        };
+        return '/ruang';
     }
 }

@@ -20,6 +20,15 @@ export interface SharedData {
     [key: string]: unknown;
 }
 
+export interface Statistik {
+    kunci: string;
+    label: string;
+    nilai: number;
+    keterangan: string;
+    href: string | null;
+    sorot?: boolean;
+}
+
 export interface Pilihan {
     id: number;
     nama: string;

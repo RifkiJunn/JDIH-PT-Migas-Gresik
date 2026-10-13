@@ -96,6 +96,16 @@ class Document extends Model
         $query->where('status', StatusDokumen::Disetujui);
     }
 
+    /** Antrean persetujuan $user: dokumen yang lolos DocumentPolicy::decide untuk akun itu. */
+    public function scopeAntrean(Builder $query, User $user): void
+    {
+        $user->peran === Peran::Gm
+            ? $query->where('status', StatusDokumen::MenungguGm)
+            : $query->where('status', StatusDokumen::MenungguManajer)
+                ->where('division_id', $user->division_id)
+                ->where('submitted_by', '!=', $user->id);
+    }
+
     /**
      * Pencarian dan filter daftar dokumen. Nilai yang tidak sah (bukan skalar, bukan angka) diabaikan.
      * LIKE ditulis dengan ESCAPE eksplisit supaya % dan _ dari pengguna tidak menjadi wildcard
