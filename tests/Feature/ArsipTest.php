@@ -134,3 +134,13 @@ it('admin tidak punya halaman arsip dan guest diarahkan ke login', function () {
     auth()->logout();
     $this->get('/arsip')->assertRedirect('/login');
 });
+
+it('arsip menyaring menurut divisi dan akses', function () {
+    $gm = User::factory()->gm()->create();
+    $publik = Document::factory()->disetujui()->publik()->create();
+    $rahasia = Document::factory()->disetujui()->create();
+
+    expect(idArsip($gm, "?divisi={$rahasia->division_id}"))->toBe([$rahasia->id])
+        ->and(idArsip($gm, '?akses=publik'))->toBe([$publik->id])
+        ->and(idArsip($gm, '?akses=bukan'))->toHaveCount(2);
+});

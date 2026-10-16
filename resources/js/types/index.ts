@@ -68,6 +68,8 @@ export interface Dokumen {
     berkas_nama?: string | null;
     berkas_ukuran?: number | null;
     boleh_unduh?: boolean;
+    dilihat?: number | null;
+    diunduh?: number | null;
     relasi?: Relasi[];
     riwayat?: Riwayat[];
 }

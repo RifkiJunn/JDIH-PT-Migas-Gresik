@@ -4,6 +4,8 @@
 
 @plugin 'tailwindcss-animate';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
 @theme {
@@ -36,14 +38,18 @@
     --color-input: var(--input);
     --color-ring: var(--primary);
 
+    /* Bidang merek (hero, kaki halaman) tetap indigo logo di kedua tema. */
+    --color-brand: #30318b;
+    --color-brand-deep: #23246b;
+    --color-on-brand: #ffffff;
     /* Teks sekunder di atas indigo: ditarik dari rona indigo, bukan abu-abu. */
     --color-on-primary-muted: #cdcff3;
     --color-sky-ink: #04263a;
 
-    --color-status-ok: #0f6b3c;
-    --color-status-wait: #8a5300;
-    --color-status-bad: #b42318;
-    --color-status-off: #5b6072;
+    --color-status-ok: var(--status-ok);
+    --color-status-wait: var(--status-wait);
+    --color-status-bad: var(--status-bad);
+    --color-status-off: var(--status-off);
 }
 
 :root {
@@ -59,6 +65,36 @@
     --border: #dfe1ea;
     --input: #c5c8d6;
     --destructive: #b42318;
+
+    --status-ok: #0f6b3c;
+    --status-wait: #8a5300;
+    --status-bad: #b42318;
+    --status-off: #5b6072;
+
+    color-scheme: light;
+}
+
+/* Tema gelap: malam berwarna indigo, bukan abu-abu netral. Primary menjadi indigo terang
+   dengan teks gelap, supaya tautan dan tombol tetap terbaca di atas latar gelap. */
+.dark {
+    --primary: #9a9df7;
+    --primary-foreground: #0e0f24;
+    --sky: #38b9f2;
+
+    --background: #0e0f22;
+    --surface: #171933;
+    --foreground: #e6e7f4;
+    --muted-foreground: #a1a4c2;
+    --border: #2b2e50;
+    --input: #3d4170;
+    --destructive: #f2786b;
+
+    --status-ok: #5fcf93;
+    --status-wait: #e8ad57;
+    --status-bad: #f2786b;
+    --status-off: #a1a4c2;
+
+    color-scheme: dark;
 }
 
 @layer base {
@@ -75,6 +111,10 @@
         font-feature-settings: 'tnum';
         caret-color: var(--primary);
         accent-color: var(--primary);
+    }
+
+    html {
+        scrollbar-color: var(--input) transparent;
     }
 
     ::selection {

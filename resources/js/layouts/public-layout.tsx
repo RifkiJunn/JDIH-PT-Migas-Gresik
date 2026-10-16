@@ -1,5 +1,6 @@
 import Brand from '@/components/brand';
 import Flash from '@/components/flash';
+import ThemeToggle from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -76,6 +77,8 @@ function Kepala() {
                     </MenuLink>
                 </nav>
 
+                <ThemeToggle className="-mr-3 ml-auto md:mr-0 md:ml-0" />
+
                 <Button asChild variant={auth.user ? 'default' : 'outline'} size="sm" className="hidden md:inline-flex">
                     <Link href={masuk.href}>
                         <LogIn aria-hidden />
@@ -85,7 +88,7 @@ function Kepala() {
 
                 <Sheet>
                     <SheetTrigger asChild>
-                        <Button variant="outline" size="icon" aria-label="Buka menu" className="ml-auto md:hidden">
+                        <Button variant="outline" size="icon" aria-label="Buka menu" className="md:hidden">
                             <Menu aria-hidden />
                         </Button>
                     </SheetTrigger>
@@ -101,7 +104,10 @@ function Kepala() {
                                 <Link
                                     key={m.href}
                                     href={m.href}
-                                    className={cn('hover:bg-surface flex min-h-11 items-center px-5 text-sm', 'anak' in m ? 'text-muted-foreground pl-9' : 'font-medium')}
+                                    className={cn(
+                                        'hover:bg-surface flex min-h-11 items-center px-5 text-sm',
+                                        'anak' in m ? 'text-muted-foreground pl-9' : 'font-medium',
+                                    )}
                                 >
                                     {m.label}
                                 </Link>
@@ -124,27 +130,27 @@ function Kepala() {
 
 function Kaki() {
     const { jenisPublik, kontak, auth } = usePage<SharedData>().props;
-    const judul = 'text-primary-foreground text-sm font-semibold';
-    const tautan = 'hover:text-primary-foreground inline-flex min-h-8 items-center underline-offset-4 hover:underline';
+    const judul = 'text-on-brand text-sm font-semibold';
+    const tautan = 'hover:text-on-brand inline-flex min-h-8 items-center underline-offset-4 hover:underline';
 
     return (
-        <footer className="bg-primary text-on-primary-muted text-sm">
+        <footer className="bg-brand-deep text-on-primary-muted text-sm">
             <div className={cn(LEBAR, 'grid gap-x-10 gap-y-10 py-12 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]')}>
                 <div className="max-w-sm">
                     <div className="flex items-center gap-3">
-                        <span aria-hidden className="mask-flame bg-primary-foreground block h-12 w-8" />
-                        <p className="text-primary-foreground leading-tight">
+                        <span aria-hidden className="mask-flame bg-on-brand block h-12 w-8" />
+                        <p className="text-on-brand leading-tight">
                             <span className="block font-serif text-xl font-semibold">JDIH</span>
                             PT Gresik Migas
                         </p>
                     </div>
                     <p className="mt-4 leading-relaxed">
-                        Jaringan Dokumentasi dan Informasi Hukum PT Gresik Migas. Tempat peraturan perusahaan, keputusan direksi, dan dokumen lain yang dibuka
-                        untuk umum.
+                        Jaringan Dokumentasi dan Informasi Hukum PT Gresik Migas. Tempat peraturan perusahaan, keputusan direksi, dan dokumen lain
+                        yang dibuka untuk umum.
                     </p>
                     {Object.keys(kontak).length > 0 && (
                         <address className="mt-4 leading-relaxed not-italic">
-                            {kontak.pengelola && <span className="text-primary-foreground block font-medium">{kontak.pengelola}</span>}
+                            {kontak.pengelola && <span className="text-on-brand block font-medium">{kontak.pengelola}</span>}
                             {kontak.alamat && <span className="block">{kontak.alamat}</span>}
                             {kontak.email && (
                                 <a href={`mailto:${kontak.email}`} className={cn(tautan, 'block')}>
@@ -209,11 +215,11 @@ function Kaki() {
                 </nav>
             </div>
 
-            <div className="border-primary-foreground/15 border-t">
+            <div className="border-on-brand/15 border-t">
                 <div className={cn(LEBAR, 'flex flex-wrap justify-between gap-x-8 gap-y-2 py-5 text-xs')}>
                     <p className="max-w-2xl">
-                        Dokumen di portal ini adalah salinan elektronik untuk keperluan informasi. Bila terdapat perbedaan, yang berlaku adalah naskah asli yang
-                        disimpan perusahaan.
+                        Dokumen di portal ini adalah salinan elektronik untuk keperluan informasi. Bila terdapat perbedaan, yang berlaku adalah naskah
+                        asli yang disimpan perusahaan.
                     </p>
                     <p>© {new Date().getFullYear()} PT Gresik Migas</p>
                 </div>

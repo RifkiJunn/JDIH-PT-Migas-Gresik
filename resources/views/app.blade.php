@@ -7,6 +7,16 @@
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
         <link rel="icon" href="/images/ptgm-logo.png">
 
+        {{-- Pasang tema sebelum halaman tergambar, supaya tidak berkedip terang saat memuat dalam mode gelap. --}}
+        <script>
+            try {
+                const tema = localStorage.getItem('tema');
+                if (tema === 'gelap' || (!tema && matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                }
+            } catch {}
+        </script>
+
         @routes
         @viteReactRefresh
         @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])

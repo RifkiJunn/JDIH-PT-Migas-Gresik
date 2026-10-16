@@ -1,7 +1,15 @@
 import Brand from '@/components/brand';
 import Flash from '@/components/flash';
+import ThemeToggle from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { type Peran, type SharedData, type User } from '@/types';
@@ -44,7 +52,10 @@ export function inisial(nama: string): string {
 
 export function Avatar({ nama, className }: { nama: string; className?: string }) {
     return (
-        <span aria-hidden className={cn('bg-primary text-primary-foreground grid size-9 shrink-0 place-items-center rounded-full text-sm font-semibold', className)}>
+        <span
+            aria-hidden
+            className={cn('bg-primary text-primary-foreground grid size-9 shrink-0 place-items-center rounded-full text-sm font-semibold', className)}
+        >
             {inisial(nama)}
         </span>
     );
@@ -104,8 +115,10 @@ function Navigasi() {
 
     return (
         <div className="flex h-full flex-col">
-            <div className="flex h-16 shrink-0 items-center border-b px-5">
+            <div className="flex h-16 shrink-0 items-center justify-between border-b pr-3 pl-5">
                 <Brand sub="Ruang internal" />
+                {/* Di ponsel tombol tema ada di bilah atas, bukan di dalam menu samping. */}
+                <ThemeToggle className="hidden lg:inline-flex" />
             </div>
             <nav aria-label="Menu utama" className="flex-1 space-y-1 overflow-y-auto p-3">
                 {MENU.filter((m) => m.peran.includes(user.peran)).map(({ label, href, icon: Icon }) => {
@@ -117,7 +130,9 @@ function Navigasi() {
                             aria-current={aktif ? 'page' : undefined}
                             className={cn(
                                 'flex min-h-11 items-center gap-3 rounded-md px-3 text-sm transition-colors duration-150',
-                                aktif ? 'bg-primary text-primary-foreground font-medium' : 'text-muted-foreground hover:bg-surface hover:text-foreground',
+                                aktif
+                                    ? 'bg-primary text-primary-foreground font-medium'
+                                    : 'text-muted-foreground hover:bg-surface hover:text-foreground',
                             )}
                         >
                             <Icon aria-hidden className="size-4" />
@@ -133,7 +148,8 @@ function Navigasi() {
     );
 }
 
-export default function InternalLayout({ children }: { children: ReactNode }) {
+/** `lebar` memberi ruang lebih untuk halaman dengan panel filter di samping. */
+export default function InternalLayout({ children, lebar }: { children: ReactNode; lebar?: boolean }) {
     return (
         <div className="min-h-svh lg:grid lg:grid-cols-[16rem_1fr]">
             <aside className="sticky top-0 hidden h-svh border-r lg:block">
@@ -142,21 +158,24 @@ export default function InternalLayout({ children }: { children: ReactNode }) {
 
             <div className="bg-background sticky top-0 z-30 flex h-14 items-center justify-between border-b px-4 lg:hidden">
                 <Brand sub="Ruang internal" />
-                <Sheet>
-                    <SheetTrigger asChild>
-                        <Button variant="outline" size="icon" aria-label="Buka menu">
-                            <Menu aria-hidden />
-                        </Button>
-                    </SheetTrigger>
-                    <SheetContent side="left" className="w-72 p-0">
-                        <SheetTitle className="sr-only">Menu</SheetTitle>
-                        <Navigasi />
-                    </SheetContent>
-                </Sheet>
+                <div className="flex items-center gap-1">
+                    <ThemeToggle />
+                    <Sheet>
+                        <SheetTrigger asChild>
+                            <Button variant="outline" size="icon" aria-label="Buka menu">
+                                <Menu aria-hidden />
+                            </Button>
+                        </SheetTrigger>
+                        <SheetContent side="left" className="w-72 p-0">
+                            <SheetTitle className="sr-only">Menu</SheetTitle>
+                            <Navigasi />
+                        </SheetContent>
+                    </Sheet>
+                </div>
             </div>
 
             <main className="min-w-0 px-4 py-6 sm:px-8 sm:py-8">
-                <div className="mx-auto max-w-5xl">
+                <div className={cn('mx-auto', lebar ? 'max-w-6xl' : 'max-w-5xl')}>
                     <Flash />
                     {children}
                 </div>

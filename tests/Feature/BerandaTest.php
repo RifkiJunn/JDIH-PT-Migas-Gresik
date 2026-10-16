@@ -89,3 +89,26 @@ it('menu publik hanya memuat jenis yang punya dokumen publik', function () {
     $this->get('/tentang')->assertInertia(fn (AssertableInertia $page) => $page
         ->component('tentang')->has('jenisPublik', 1)->where('jenisPublik.0.id', $publik->document_type_id));
 });
+
+it('menyaring menurut nomor, status hukum, dan mengurutkan', function () {
+    $lama = Document::factory()->disetujui()->publik()->create(['nomor' => 'PP/001/2021', 'judul' => 'B lama', 'tanggal_penetapan' => '2021-01-01']);
+    $baru = Document::factory()->disetujui()->publik()->create(['nomor' => 'PP/004/2024', 'judul' => 'A baru', 'tanggal_penetapan' => '2024-01-01']);
+    $habis = Document::factory()->disetujui()->publik()->create(['nomor' => 'SK/9/2020', 'judul' => 'C habis', 'tanggal_penetapan' => '2020-01-01', 'tanggal_kadaluarsa' => '2022-01-01']);
+    $baru->relasiKeluar()->create(['related_document_id' => $lama->id, 'jenis' => 'mengubah']);
+
+    expect(idBeranda('?nomor=pp/00'))->toBe([$baru->id, $lama->id])
+        ->and(idBeranda('?status=diubah'))->toBe([$lama->id])
+        ->and(idBeranda('?status=berlaku'))->toBe([$baru->id])
+        ->and(idBeranda('?status=berakhir'))->toBe([$habis->id])
+        ->and(idBeranda('?status=dicabut'))->toBe([])
+        ->and(idBeranda('?urut=terlama'))->toBe([$habis->id, $lama->id, $baru->id])
+        ->and(idBeranda('?urut=judul'))->toBe([$baru->id, $lama->id, $habis->id]);
+});
+
+it('daftar dokumen memuat jumlah dilihat dan diunduh serta jumlah per jenis', function () {
+    $dok = Document::factory()->disetujui()->publik()->create();
+    $dok->accessLogs()->createMany([['aksi' => 'lihat', 'ip' => '1.1.1.1'], ['aksi' => 'lihat', 'ip' => '1.1.1.1'], ['aksi' => 'unduh', 'ip' => '1.1.1.1']]);
+
+    $this->get('/dokumen')->assertInertia(fn (AssertableInertia $page) => $page
+        ->where('dokumen.data.0.dilihat', 2)->where('dokumen.data.0.diunduh', 1)->where('pilihan.jenis.0.jumlah', 1));
+});

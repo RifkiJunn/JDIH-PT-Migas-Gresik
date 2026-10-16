@@ -1,44 +1,43 @@
-import DocumentFilter, { type Filter, type PilihanFilter } from '@/components/document-filter';
-import DocumentRow from '@/components/document-row';
-import Pagination from '@/components/pagination';
+import DocumentCatalog from '@/components/document-catalog';
+import { type Filter, type PilihanFilter } from '@/components/document-filter';
 import PublicLayout from '@/layouts/public-layout';
 import { type Dokumen, type Halaman } from '@/types';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
+import { ChevronRight } from 'lucide-react';
+
+/** Kepala halaman katalog: pita indigo tipis yang menyambung hero beranda. */
+function Kepala() {
+    return (
+        <section className="bg-brand text-on-brand relative isolate overflow-hidden">
+            <div aria-hidden className="mask-flame bg-sky/20 absolute -top-[40%] right-[4%] -z-10 hidden aspect-[408/612] h-[260%] sm:block" />
+            <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
+                <nav aria-label="Remah roti" className="text-on-primary-muted flex items-center gap-1.5 text-sm">
+                    <Link href={route('beranda')} className="hover:text-on-brand underline-offset-4 hover:underline">
+                        Beranda
+                    </Link>
+                    <ChevronRight aria-hidden className="size-3.5" />
+                    <span aria-current="page">Dokumen hukum</span>
+                </nav>
+                <h1 className="mt-3 font-serif text-3xl font-semibold tracking-tight text-balance sm:text-4xl">Katalog dokumen hukum</h1>
+                <p className="text-on-primary-muted mt-2 max-w-2xl">
+                    Peraturan perusahaan, keputusan direksi, dan dokumen lain PT Gresik Migas yang dibuka untuk umum.
+                </p>
+            </div>
+        </section>
+    );
+}
 
 export default function DokumenIndex({ dokumen, filter, pilihan }: { dokumen: Halaman<Dokumen>; filter: Filter; pilihan: PilihanFilter }) {
-    const adaFilter = Object.values(filter).some(Boolean);
-
     return (
-        <PublicLayout>
+        <PublicLayout hero={<Kepala />}>
             <Head title="Dokumen hukum" />
-
-            <h1 className="font-serif text-3xl font-semibold tracking-tight text-balance sm:text-4xl">Semua dokumen</h1>
-            <p className="text-muted-foreground mt-2 max-w-2xl">
-                Peraturan perusahaan, keputusan direksi, dan dokumen lain yang dibuka untuk umum. Cari berdasarkan judul atau nomor.
-            </p>
-
-            <div className="mt-8">
-                <DocumentFilter action={route('dokumen.index')} filter={filter} pilihan={pilihan} />
-            </div>
-
-            <p aria-live="polite" className="text-muted-foreground mt-8 border-b pb-3 text-sm">
-                {dokumen.total} dokumen{adaFilter && ' sesuai pencarian'}
-            </p>
-
-            {dokumen.data.length > 0 ? (
-                <ul>
-                    {dokumen.data.map((d) => (
-                        <DocumentRow key={d.id} document={d} href={route('dokumen.show', d.id)} />
-                    ))}
-                </ul>
-            ) : (
-                <div className="py-12">
-                    <p className="font-serif text-lg">{adaFilter ? 'Tidak ada dokumen yang cocok.' : 'Belum ada dokumen yang dibuka untuk umum.'}</p>
-                    {adaFilter && <p className="text-muted-foreground mt-1 text-sm">Coba kata kunci lain, atau hapus filter jenis dan tahun.</p>}
-                </div>
-            )}
-
-            <Pagination halaman={dokumen} />
+            <DocumentCatalog
+                action={route('dokumen.index')}
+                dokumen={dokumen}
+                filter={filter}
+                pilihan={pilihan}
+                kosong="Belum ada dokumen yang dibuka untuk umum."
+            />
         </PublicLayout>
     );
 }

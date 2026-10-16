@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 /** Portal publik, arsip internal, detail dokumen, dan berkasnya. */
 class DokumenController extends Controller
 {
-    private const FILTER = ['q', 'jenis', 'tahun', 'subjek', 'kadaluarsa'];
+    private const FILTER = ['q', 'nomor', 'jenis', 'tahun', 'subjek', 'divisi', 'akses', 'status', 'kadaluarsa', 'urut'];
 
     /**
      * Beranda JDIH: ringkasan koleksi publik. Daftar jenis dan jumlahnya datang dari
@@ -92,9 +92,18 @@ class DokumenController extends Controller
 
     private function daftar($query, Request $request)
     {
+        $query = match ($request->query('urut')) {
+            'terlama' => $query->orderBy('tanggal_penetapan')->orderBy('id'),
+            'judul' => $query->orderBy('judul'),
+            default => $query->orderByDesc('tanggal_penetapan')->orderByDesc('id'),
+        };
+
         return $query->saring($request->only(self::FILTER))
             ->with('type', 'division', 'pengaju')
-            ->orderByDesc('tanggal_penetapan')->orderByDesc('id')
+            ->withCount([
+                'accessLogs as dilihat_count' => fn ($q) => $q->where('aksi', AksiAkses::Lihat),
+                'accessLogs as diunduh_count' => fn ($q) => $q->where('aksi', AksiAkses::Unduh),
+            ])
             ->paginate(20)->withQueryString()
             ->through(fn (Document $d) => $d->ringkas());
     }

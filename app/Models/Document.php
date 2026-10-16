@@ -58,6 +58,11 @@ class Document extends Model
         return $this->hasMany(DocumentRelation::class, 'related_document_id');
     }
 
+    public function accessLogs(): HasMany
+    {
+        return $this->hasMany(AccessLog::class);
+    }
+
     public function approvalLogs(): HasMany
     {
         return $this->hasMany(ApprovalLog::class)->oldest('id');
@@ -111,36 +116,65 @@ class Document extends Model
      * LIKE ditulis dengan ESCAPE eksplisit supaya % dan _ dari pengguna tidak menjadi wildcard
      * dan perilakunya sama di PostgreSQL, MySQL, dan SQLite.
      *
-     * @param  array{q?: mixed, jenis?: mixed, tahun?: mixed, subjek?: mixed, kadaluarsa?: mixed}  $filter
+     * @param  array<string, mixed>  $filter  q, nomor, jenis, tahun, subjek, divisi, akses, status, kadaluarsa
      */
     public function scopeSaring(Builder $query, array $filter): void
     {
         $teks = fn (string $k) => is_string($filter[$k] ?? null) && trim($filter[$k]) !== '' ? trim($filter[$k]) : null;
         $angka = fn (string $k) => ctype_digit((string) ($teks($k) ?? '')) ? (int) $filter[$k] : null;
+        $mirip = fn (string $nilai) => '%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], mb_strtolower($nilai)).'%';
 
         if ($q = $teks('q')) {
-            $pola = '%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], mb_strtolower($q)).'%';
             $query->where(fn (Builder $b) => $b
-                ->whereRaw("LOWER(judul) LIKE ? ESCAPE '!'", [$pola])
-                ->orWhereRaw("LOWER(nomor) LIKE ? ESCAPE '!'", [$pola]));
+                ->whereRaw("LOWER(judul) LIKE ? ESCAPE '!'", [$mirip($q)])
+                ->orWhereRaw("LOWER(nomor) LIKE ? ESCAPE '!'", [$mirip($q)]));
         }
 
         $query
+            ->when($teks('nomor'), fn (Builder $b, string $n) => $b->whereRaw("LOWER(nomor) LIKE ? ESCAPE '!'", [$mirip($n)]))
             ->when($angka('jenis'), fn (Builder $b, int $id) => $b->where('document_type_id', $id))
             ->when($angka('tahun'), fn (Builder $b, int $tahun) => $b->whereYear('tanggal_penetapan', $tahun))
+            ->when($angka('divisi'), fn (Builder $b, int $id) => $b->where('division_id', $id))
+            ->when(Akses::tryFrom($teks('akses') ?? ''), fn (Builder $b, Akses $a) => $b->where('akses', $a))
             ->when($teks('subjek'), fn (Builder $b, string $s) => $b->where('subjek', $s))
+            ->when($teks('status'), fn (Builder $b, string $s) => $b->berstatus($s))
             ->when($teks('kadaluarsa'), fn (Builder $b) => $b->whereBetween('tanggal_kadaluarsa', [today(), today()->addDays(90)]));
     }
 
-    /** Isi pilihan filter (jenis, tahun, subjek) dari dokumen yang ada di $query. */
+    /**
+     * Padanan query dari statusHukum() + isBerakhir(), dengan urutan prioritas yang sama:
+     * dicabut > digantikan > diubah > berlaku. "Berlaku" juga berarti belum berakhir.
+     */
+    public function scopeBerstatus(Builder $query, string $status): void
+    {
+        $oleh = fn (JenisRelasi ...$jenis) => fn (Builder $r) => $r->whereIn('jenis', $jenis)
+            ->whereHas('document', fn (Builder $d) => $d->where('status', StatusDokumen::Disetujui));
+
+        match ($status) {
+            'dicabut' => $query->whereHas('relasiMasuk', $oleh(JenisRelasi::Mencabut)),
+            'digantikan' => $query->whereHas('relasiMasuk', $oleh(JenisRelasi::Menggantikan))
+                ->whereDoesntHave('relasiMasuk', $oleh(JenisRelasi::Mencabut)),
+            'diubah' => $query->whereHas('relasiMasuk', $oleh(JenisRelasi::Mengubah))
+                ->whereDoesntHave('relasiMasuk', $oleh(JenisRelasi::Mencabut, JenisRelasi::Menggantikan)),
+            'berlaku' => $query->whereDoesntHave('relasiMasuk', $oleh(JenisRelasi::Mencabut, JenisRelasi::Menggantikan, JenisRelasi::Mengubah))
+                ->where(fn (Builder $b) => $b->whereNull('tanggal_kadaluarsa')->orWhere('tanggal_kadaluarsa', '>=', today())),
+            'berakhir' => $query->where('tanggal_kadaluarsa', '<', today()),
+            default => null,
+        };
+    }
+
+    /** Isi pilihan filter dari dokumen yang ada di $query: jenis (dengan jumlah), tahun, subjek, divisi. */
     public static function pilihanFilter(Builder $query): array
     {
-        $baris = $query->toBase()->get(['document_type_id', 'tanggal_penetapan', 'subjek']);
+        $baris = $query->toBase()->get(['document_type_id', 'division_id', 'tanggal_penetapan', 'subjek']);
+        $jumlah = $baris->countBy('document_type_id');
 
         return [
-            'jenis' => DocumentType::whereIn('id', $baris->pluck('document_type_id')->unique())->orderBy('nama')->get(['id', 'nama']),
+            'jenis' => DocumentType::whereIn('id', $jumlah->keys())->orderBy('nama')->get(['id', 'nama'])
+                ->map(fn (DocumentType $j) => ['id' => $j->id, 'nama' => $j->nama, 'jumlah' => $jumlah[$j->id]]),
             'tahun' => $baris->map(fn ($b) => (int) substr($b->tanggal_penetapan, 0, 4))->unique()->sortDesc()->values(),
             'subjek' => $baris->pluck('subjek')->filter()->unique()->sort()->values(),
+            'divisi' => Division::whereIn('id', $baris->pluck('division_id')->unique())->orderBy('nama')->get(['id', 'nama']),
         ];
     }
 
@@ -193,6 +227,10 @@ class Document extends Model
             'abstrak' => $this->abstrak,
             'subjek' => $this->subjek,
             'pengaju' => $this->pengaju->name,
+            'berkas_ukuran' => $this->berkas_ukuran,
+            // Hanya terisi bila query memuat withCount (daftar dokumen).
+            'dilihat' => $this->dilihat_count,
+            'diunduh' => $this->diunduh_count,
         ];
     }
 
